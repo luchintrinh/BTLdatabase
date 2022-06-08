@@ -58,11 +58,7 @@ create table diem
 	ghichu_ki_2 nvarchar(50),
 	hocluc_ki_2 nvarchar(20),
 --canam
-	diem_tb_canam float,
-
-
-
-
+	diem_tb_canam float
 )
 go
 
@@ -76,7 +72,14 @@ create table mon_hoc
 )
 go
 
-
+-- tao ham tinh diem trung binh môn học
+ create function dtb
+ (@ma_mh char(10), @diem1 float, @diem2 float, @diem3 float)
+ return float
+ as
+ begin
+	@dtb
+ end
 
 
   select *from diem
@@ -89,26 +92,33 @@ insert LOP values
 
 --nhập bảng giáo viên 
 insert giaovien values
-('0001', 'NGUYEN THI PHUONG','0123456789','QUAN_HAI_BA_CHUNG','NU','phuong@gmail.com'),
+('0001', 'NGUYEN THI PHUONG','0123456789','HAI BA TRUNG','NU','phuong@gmail.com'),
 ('0002', '','','','','');
+insert giaovien values
+('0003', 'NGUYEN THI THAO','0123456322','HOANG MAI','NU','thao@gmail.com'),
+('0004', 'NGUYEN THI HAU','0123456789','HOAN KIEM','NU','hau@gmail.com'),
+('0005', 'DAO PHUONG HANG','0123456559','THANH XUAN','NU','hang@gmail.com'),
+('0006', 'HA THU THUY ','123456789','HAI BA TRUNG','NU','thuy@gmail.com'),
+('0007', 'NGUYEN VIET HUNG ','012784789','QUAN_HAI_BA_CHUNG','NAM','hung@gmail.com');
 
 
 --nhập bảng học sinh
 insert hocsinh values
-('00001', 'NGUYEN THI DIU','0987654321','NU','2022_10A'),
-('00002', '','','','2022_10A');
+('00001', 'NGUYEN THI DIU','0987654321','NU','2022_10A')
+;
 --nhập bảng môn học
 
 insert mon_hoc values
 ('TA', N'Tiếng Anh', '0001'),
-('GDCD', N'Giáo dục', '0002');
+('GDCD', N'Giáo dục', '0001');
 
 --nhập bảng điểm
 
 insert diem values
-('00001', '2022_10A','TA','1','2','3','4','5','tot','gioi','1','2','3','4','5','tot','gioi', 9),
-('00002',  '2022_10A','GDCD','1','2','3','4','5','tot','gioi','1','2','3','4','5','tot','gioi',9 );
+('00001', '2022_10A','TA','1','2','3','4','5','tot','gioi','1','2','3','4','5','tot','gioi', 9);
 
-
+select * from lop
+select * from giaovien
+select * from hocsinh
+select * from mon_hoc
 select * from diem
-
