@@ -110,7 +110,13 @@ insert hocsinh values
 
 insert mon_hoc values
 ('TA', N'Tiếng Anh', '0001'),
-('GDCD', N'Giáo dục', '0001');
+('GDCD', N'Giáo dục công dân', '0002');
+insert mon_hoc values
+('TO', N'Toán', '0003'),
+('VA', N'Văn', '0004'),
+('SI', N'Sinh', '0005'),
+('LI', N'Lí', '0006'),
+('HO', N'Hóa', '0007');
 
 --nhập bảng điểm
 
