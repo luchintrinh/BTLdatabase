@@ -76,7 +76,14 @@ create table mon_hoc
 )
 go
 
-
+-- tao ham tinh diem trung binh môn học
+ create function dtb
+ (@ma_mh char(10), @diem1 float, @diem2 float, @diem3 float)
+ return float
+ as
+ begin
+	@dtb
+ end
 
 
   select *from diem
