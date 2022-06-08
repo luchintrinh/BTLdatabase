@@ -92,8 +92,14 @@ insert LOP values
 
 --nhập bảng giáo viên 
 insert giaovien values
-('0001', 'NGUYEN THI PHUONG','0123456789','QUAN_HAI_BA_CHUNG','NU','phuong@gmail.com'),
+('0001', 'NGUYEN THI PHUONG','0123456789','HAI BA TRUNG','NU','phuong@gmail.com'),
 ('0002', '','','','','');
+insert giaovien values
+('0003', 'NGUYEN THI THAO','0123456322','HOANG MAI','NU','thao@gmail.com'),
+('0004', 'NGUYEN THI HAU','0123456789','HOAN KIEM','NU','hau@gmail.com'),
+('0005', 'DAO PHUONG HANG','0123456559','THANH XUAN','NU','hang@gmail.com'),
+('0006', 'HA THU THUY ','123456789','HAI BA TRUNG','NU','thuy@gmail.com'),
+('0007', 'NGUYEN VIET HUNG ','012784789','QUAN_HAI_BA_CHUNG','NAM','hung@gmail.com');
 
 
 --nhập bảng học sinh
