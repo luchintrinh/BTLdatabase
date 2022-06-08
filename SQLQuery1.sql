@@ -58,11 +58,7 @@ create table diem
 	ghichu_ki_2 nvarchar(50),
 	hocluc_ki_2 nvarchar(20),
 --canam
-	diem_tb_canam float,
-
-
-
-
+	diem_tb_canam float
 )
 go
 
@@ -95,20 +91,21 @@ insert giaovien values
 
 --nhập bảng học sinh
 insert hocsinh values
-('00001', 'NGUYEN THI DIU','0987654321','NU','2022_10A'),
-('00002', '','','','2022_10A');
+('00001', 'NGUYEN THI DIU','0987654321','NU','2022_10A')
+;
 --nhập bảng môn học
 
 insert mon_hoc values
 ('TA', N'Tiếng Anh', '0001'),
-('GDCD', N'Giáo dục', '0002');
+('GDCD', N'Giáo dục', '0001');
 
 --nhập bảng điểm
 
 insert diem values
-('00001', '2022_10A','TA','1','2','3','4','5','tot','gioi','1','2','3','4','5','tot','gioi', 9),
-('00002',  '2022_10A','GDCD','1','2','3','4','5','tot','gioi','1','2','3','4','5','tot','gioi',9 );
+('00001', '2022_10A','TA','1','2','3','4','5','tot','gioi','1','2','3','4','5','tot','gioi', 9);
 
-
+select * from lop
+select * from giaovien
+select * from hocsinh
+select * from mon_hoc
 select * from diem
-
