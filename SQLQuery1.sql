@@ -62,6 +62,9 @@ create table diem
 )
 go
 
+--them cột cho bảng điểm
+alter table diem add hocluc nvarchar(20);
+
 --tao bảng môn học 
 create table mon_hoc
 (
@@ -74,58 +77,29 @@ go
 
 
 --KHU VỰC HÀM TÍNH TOÁN, KHÔNG SỬA PHẦN NÀY NHA  
---ham test
-create function cong()
-returns int
-as
-begin
-	declare @tong int
-	set @tong=7+7
-	return @tong
-end
 
-print'kết quả là: '+convert(varchar, dbo.cong())
--- tao ham tinh diem trung binh môn học kỳ 1
-CREATE FUNCTION TB1
-(@ma_mh char(10), @ma_hs char(10))
+-- tao ham tinh diem trung binh môn
+CREATE FUNCTION TB
+(	@diem1 float,
+	@diem2 float,
+	@diem3 float,
+	@diem4 float
+)
  returns float
  as
  begin
-	declare @diem1 float
-	declare @diem2 float
-	declare @diem3 float
-	declare @diem4 float
 	declare @dtb float
-	select @diem1=diem_mieng_ki_1, @diem2=diem_15_ki_1, @diem3=diem_45_ki_1, @diem4=diem_cuoiki_ki_1 from diem where @ma_mh=mamh and mahs=@ma_hs
-	set @dtb=avg(@diem1+@diem2+@diem3+@diem3+@diem4+@diem4+@diem4)
+	set @dtb=(@diem1+@diem2+@diem3*2+@diem4*3)/7
 	return @dtb
  end;
-
- -- tao ham tinh diem trung binh môn học kỳ 1
- create function TB2
-(@ma_mh char(10), @ma_hs char(10))
- returns float
- as
- begin
-	declare @diem1 float
-	declare @diem2 float
-	declare @diem3 float
-	declare @diem4 float
-	declare @dtbinh float
-	select @diem1=diem_mieng_ki_2, @diem2=diem_15_ki_2, @diem3=diem_45_ki_2, @diem4=diem_cuoiki_ki_2 from diem where @ma_mh=mamh and mahs=@ma_hs
-	set @dtbinh=avg(@diem1+@diem2+@diem3+@diem3+@diem4+@diem4+@diem4)
-	return @dtbinh
- end;
-
+ go
 --tạo hàm trả về học lực ki 1
 create function hocluc
-(@ma_mh char(10), @ma_hs char(10))
-returns char(10)
+(@dtb float)
+returns char(20)
 as
 begin 
 	declare @xet char(10)
-	declare @dtb float
-	select @dtb=diem_tb_ki_1 from diem where @ma_hs=mahs and @ma_mh=mamh
 	if @dtb>9
 	set @xet='xuat sac'
 	else if @dtb<9 and @dtb>=8
@@ -138,28 +112,10 @@ begin
 
 	return @xet
 end;
--- học lực kì 2
-create function hocluc2
-(@ma_mh char(10), @ma_hs char(10))
-returns char(10)
-as
-begin 
-	declare @xet char(10)
-	declare @dtb float
-	select @dtb=diem_tb_ki_2 from diem where @ma_hs=mahs and @ma_mh=mamh
-	if @dtb>9
-	set @xet='xuat sac'
-	else if @dtb<9 and @dtb>=8
-	set @xet='gioi'
-	else if @dtb<8 and @dtb>=6.5
-	set @xet='kha'
-	else if @dtb<6.5 and @dtb>=5
-	set @xet='TB'
-	else set @xet='yeu'
+go
+drop function hocluc
 
-	return @xet
-end;
-
+--KHU VỰC NHẬP DỮ LIỆU VÀO BẢNG
 --nhập bảng lớp 
 insert LOP values
 ('2022_10A', '10A'),
@@ -220,7 +176,16 @@ insert diem values
 ('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
 ('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0);
 
-
+--UPDATE DỮ LIỆU
+--update điểm trung bình kỳ 1-2
+update diem set diem_tb_ki_1=ROUND(dbo.TB(diem_mieng_ki_1 ,diem_15_ki_1, diem_45_ki_1, diem_cuoiki_ki_1), 1);
+update diem set diem_tb_ki_2=round(dbo.TB(diem_mieng_ki_2 ,diem_15_ki_2, diem_45_ki_2, diem_cuoiki_ki_2), 1);
+--điểm trung bình cả năm
+update diem set diem_tb_canam=(diem_tb_ki_1+diem_tb_ki_2*2)/3;
+--update học lực cho sinh viên
+update diem set hocluc_ki_1=dbo.hocluc(diem_tb_ki_1);
+update diem set hocluc_ki_2=dbo.hocluc(diem_tb_ki_2);
+update diem set hocluc=dbo.hocluc(diem_tb_canam);
 select * from lop
 select * from giaovien
 select * from hocsinh
