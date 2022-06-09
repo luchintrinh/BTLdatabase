@@ -33,6 +33,16 @@ create table hocsinh
 )
 go
 
+--tao bảng môn học 
+create table mon_hoc
+(
+	mamh char(10) primary key,
+	ten_mon_hoc nvarchar(100),
+	magv char(10) references giaovien(magv)
+
+)
+go
+
 --tao bảng điểm 
 
 create table diem
@@ -64,16 +74,8 @@ go
 
 --them cột cho bảng điểm
 alter table diem add hocluc nvarchar(20);
-
---tao bảng môn học 
-create table mon_hoc
-(
-	mamh char(10) primary key,
-	ten_mon_hoc nvarchar(15),
-	magv char(10) references giaovien(magv)
-
-)
 go
+
 
 
 --KHU VỰC HÀM TÍNH TOÁN, KHÔNG SỬA PHẦN NÀY NHA  
@@ -93,8 +95,11 @@ CREATE FUNCTION TB
 	return @dtb
  end;
  go
+
+
+
 --tạo hàm trả về học lực ki 1
-create function hocluc
+create function hocluc1
 (@dtb float)
 returns char(20)
 as
@@ -113,6 +118,8 @@ begin
 	return @xet
 end;
 go
+
+
 drop function hocluc
 
 --KHU VỰC NHẬP DỮ LIỆU VÀO BẢNG
@@ -153,28 +160,11 @@ insert mon_hoc values
 --nhập bảng điểm
 
 insert diem values
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0);
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0,NULL);
+insert diem values
+('00001', '2022_10A','LI',6.5,7,8.0,5.5, 0,'tot',NULL,5.5,7.0,6.5,6.5, 0,'tot',NULL, 0,NULL);
+
+delete  from diem where mamh='LI'
 
 --UPDATE DỮ LIỆU
 --update điểm trung bình kỳ 1-2
@@ -183,9 +173,9 @@ update diem set diem_tb_ki_2=round(dbo.TB(diem_mieng_ki_2 ,diem_15_ki_2, diem_45
 --điểm trung bình cả năm
 update diem set diem_tb_canam=(diem_tb_ki_1+diem_tb_ki_2*2)/3;
 --update học lực cho sinh viên
-update diem set hocluc_ki_1=dbo.hocluc(diem_tb_ki_1);
-update diem set hocluc_ki_2=dbo.hocluc(diem_tb_ki_2);
-update diem set hocluc=dbo.hocluc(diem_tb_canam);
+update diem set hocluc_ki_1=dbo.hocluc1(diem_tb_ki_1);
+update diem set hocluc_ki_2=dbo.hocluc1(diem_tb_ki_2);
+update diem set hocluc=dbo.hocluc1(diem_tb_canam);
 select * from lop
 select * from giaovien
 select * from hocsinh
