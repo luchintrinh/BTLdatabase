@@ -4,12 +4,6 @@ go
 use quanlidiemsv
 go
 
-create table lop
-(
-	malop char(10) primary key,
-	tenlop nvarchar(100)
-)
-go
 --tạo bảng thông tin giaovien
 create table giaovien
 (	
@@ -19,6 +13,22 @@ create table giaovien
 	diachi nvarchar(100),
 	gioitinh varchar(15),
 	email char(50)
+)
+go
+--tao bảng môn học 
+create table mon_hoc
+(
+	mamh char(10) primary key,
+	ten_mon_hoc nvarchar(100),
+	magv char(10) references giaovien(magv)
+
+)
+go
+--tạo bảng lớp
+create table lop
+(
+	malop char(10) primary key,
+	tenlop nvarchar(100)
 )
 go
 
@@ -33,15 +43,6 @@ create table hocsinh
 )
 go
 
---tao bảng môn học 
-create table mon_hoc
-(
-	mamh char(10) primary key,
-	ten_mon_hoc nvarchar(100),
-	magv char(10) references giaovien(magv)
-
-)
-go
 
 --tao bảng điểm 
 
@@ -120,62 +121,63 @@ end;
 go
 
 
-drop function hocluc
-
 --KHU VỰC NHẬP DỮ LIỆU VÀO BẢNG
 --nhập bảng lớp 
 insert LOP values
 ('2022_10A', '10A'),
 ('2022_10B', '10B');
-
+go
 
 --nhập bảng giáo viên 
 insert giaovien values
 ('0001', 'NGUYEN THI PHUONG','0123456789','HAI BA TRUNG','NU','phuong@gmail.com'),
-('0002', '','','','','');
-insert giaovien values
+('0002', '','','','',''),
 ('0003', 'NGUYEN THI THAO','0123456322','HOANG MAI','NU','thao@gmail.com'),
 ('0004', 'NGUYEN THI HAU','0123456789','HOAN KIEM','NU','hau@gmail.com'),
 ('0005', 'DAO PHUONG HANG','0123456559','THANH XUAN','NU','hang@gmail.com'),
 ('0006', 'HA THU THUY ','123456789','HAI BA TRUNG','NU','thuy@gmail.com'),
 ('0007', 'NGUYEN VIET HUNG ','012784789','QUAN_HAI_BA_CHUNG','NAM','hung@gmail.com');
-
-
---nhập bảng học sinh
-insert hocsinh values
-('00001', 'NGUYEN THI DIU','0987654321','NU','2022_10A')
-;
+go
 --nhập bảng môn học
 
 insert mon_hoc values
 ('TA', N'Tiếng Anh', '0001'),
-('GDCD', N'Giáo dục công dân', '0002');
-insert mon_hoc values
+('GDCD', N'Giáo dục công dân', '0002'),
 ('TO', N'Toán', '0003'),
 ('VA', N'Văn', '0004'),
 ('SI', N'Sinh', '0005'),
 ('LI', N'Lí', '0006'),
 ('HO', N'Hóa', '0007');
+go
+--nhập bảng học sinh
+insert hocsinh values
+('00001', 'NGUYEN THI DIU','0987654321','NU','2022_10A')
+go
 
 --nhập bảng điểm
 
 insert diem values
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0,NULL);
-insert diem values
-('00001', '2022_10A','LI',6.5,7,8.0,5.5, 0,'tot',NULL,5.5,7.0,6.5,6.5, 0,'tot',NULL, 0,NULL);
-
-delete  from diem where mamh='LI'
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0,NULL),
+('00001', '2022_10A','LI',6.5,7,8.0,5.5, 0,'tot',NULL,5.5,7.0,6.5,6.5, 0,'tot',NULL, 0,NULL),
+('00001', '2022_10A','HO',3.5,9.6,7,5.5, 0,'tot',NULL,5.5,7.8,6.5,6.5, 0,'tot',NULL, 0,NULL);
+go
 
 --UPDATE DỮ LIỆU
---update điểm trung bình kỳ 1-2
-update diem set diem_tb_ki_1=ROUND(dbo.TB(diem_mieng_ki_1 ,diem_15_ki_1, diem_45_ki_1, diem_cuoiki_ki_1), 1);
-update diem set diem_tb_ki_2=round(dbo.TB(diem_mieng_ki_2 ,diem_15_ki_2, diem_45_ki_2, diem_cuoiki_ki_2), 1);
---điểm trung bình cả năm
-update diem set diem_tb_canam=(diem_tb_ki_1+diem_tb_ki_2*2)/3;
---update học lực cho sinh viên
-update diem set hocluc_ki_1=dbo.hocluc1(diem_tb_ki_1);
-update diem set hocluc_ki_2=dbo.hocluc1(diem_tb_ki_2);
-update diem set hocluc=dbo.hocluc1(diem_tb_canam);
+
+--TẠO TRIGGER 
+--update khi insert dữ liệu vào
+create trigger capnhat on diem after insert 
+as
+begin 
+	print'trigger'
+	update diem set diem_tb_ki_1=ROUND(dbo.TB(diem_mieng_ki_1 ,diem_15_ki_1, diem_45_ki_1, diem_cuoiki_ki_1), 1);
+	update diem set diem_tb_ki_2=round(dbo.TB(diem_mieng_ki_2 ,diem_15_ki_2, diem_45_ki_2, diem_cuoiki_ki_2), 1);
+	update diem set diem_tb_canam=ROUND(diem_tb_ki_1+diem_tb_ki_2*2, 1)/3;
+	update diem set hocluc_ki_1=dbo.hocluc1(diem_tb_ki_1);
+	update diem set hocluc_ki_2=dbo.hocluc1(diem_tb_ki_2);
+
+	update diem set hocluc=dbo.hocluc1(diem_tb_canam);
+end
 select * from lop
 select * from giaovien
 select * from hocsinh
