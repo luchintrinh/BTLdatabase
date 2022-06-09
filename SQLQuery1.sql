@@ -72,17 +72,93 @@ create table mon_hoc
 )
 go
 
--- tao ham tinh diem trung binh môn học
- create function dtb
- (@ma_mh char(10), @diem1 float, @diem2 float, @diem3 float)
- return float
+
+--KHU VỰC HÀM TÍNH TOÁN, KHÔNG SỬA PHẦN NÀY NHA  
+--ham test
+create function cong()
+returns int
+as
+begin
+	declare @tong int
+	set @tong=7+7
+	return @tong
+end
+
+print'kết quả là: '+convert(varchar, dbo.cong())
+-- tao ham tinh diem trung binh môn học kỳ 1
+CREATE FUNCTION TB1
+(@ma_mh char(10), @ma_hs char(10))
+ returns float
  as
  begin
-	@dtb
- end
+	declare @diem1 float
+	declare @diem2 float
+	declare @diem3 float
+	declare @diem4 float
+	declare @dtb float
+	select @diem1=diem_mieng_ki_1, @diem2=diem_15_ki_1, @diem3=diem_45_ki_1, @diem4=diem_cuoiki_ki_1 from diem where @ma_mh=mamh and mahs=@ma_hs
+	set @dtb=avg(@diem1+@diem2+@diem3+@diem3+@diem4+@diem4+@diem4)
+	return @dtb
+ end;
 
+ -- tao ham tinh diem trung binh môn học kỳ 1
+ create function TB2
+(@ma_mh char(10), @ma_hs char(10))
+ returns float
+ as
+ begin
+	declare @diem1 float
+	declare @diem2 float
+	declare @diem3 float
+	declare @diem4 float
+	declare @dtbinh float
+	select @diem1=diem_mieng_ki_2, @diem2=diem_15_ki_2, @diem3=diem_45_ki_2, @diem4=diem_cuoiki_ki_2 from diem where @ma_mh=mamh and mahs=@ma_hs
+	set @dtbinh=avg(@diem1+@diem2+@diem3+@diem3+@diem4+@diem4+@diem4)
+	return @dtbinh
+ end;
 
-  select *from diem
+--tạo hàm trả về học lực ki 1
+create function hocluc
+(@ma_mh char(10), @ma_hs char(10))
+returns char(10)
+as
+begin 
+	declare @xet char(10)
+	declare @dtb float
+	select @dtb=diem_tb_ki_1 from diem where @ma_hs=mahs and @ma_mh=mamh
+	if @dtb>9
+	set @xet='xuat sac'
+	else if @dtb<9 and @dtb>=8
+	set @xet='gioi'
+	else if @dtb<8 and @dtb>=6.5
+	set @xet='kha'
+	else if @dtb<6.5 and @dtb>=5
+	set @xet='TB'
+	else set @xet='yeu'
+
+	return @xet
+end;
+-- học lực kì 2
+create function hocluc2
+(@ma_mh char(10), @ma_hs char(10))
+returns char(10)
+as
+begin 
+	declare @xet char(10)
+	declare @dtb float
+	select @dtb=diem_tb_ki_2 from diem where @ma_hs=mahs and @ma_mh=mamh
+	if @dtb>9
+	set @xet='xuat sac'
+	else if @dtb<9 and @dtb>=8
+	set @xet='gioi'
+	else if @dtb<8 and @dtb>=6.5
+	set @xet='kha'
+	else if @dtb<6.5 and @dtb>=5
+	set @xet='TB'
+	else set @xet='yeu'
+
+	return @xet
+end;
 
 --nhập bảng lớp 
 insert LOP values
@@ -121,7 +197,29 @@ insert mon_hoc values
 --nhập bảng điểm
 
 insert diem values
-('00001', '2022_10A','TA','1','2','3','4','5','tot','gioi','1','2','3','4','5','tot','gioi', 9);
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0),
+('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0);
+
 
 select * from lop
 select * from giaovien
