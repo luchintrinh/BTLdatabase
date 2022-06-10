@@ -120,12 +120,30 @@ begin
 end;
 go
 
+--UPDATE DỮ LIỆU
+
+--TẠO TRIGGER 
+--update khi insert dữ liệu vào
+create trigger capnhat on diem after insert 
+as
+begin 
+	print'trigger'
+	update diem set diem_tb_ki_1=ROUND(dbo.TB(diem_mieng_ki_1 ,diem_15_ki_1, diem_45_ki_1, diem_cuoiki_ki_1), 1);
+	update diem set diem_tb_ki_2=round(dbo.TB(diem_mieng_ki_2 ,diem_15_ki_2, diem_45_ki_2, diem_cuoiki_ki_2), 1);
+	update diem set diem_tb_canam=ROUND(diem_tb_ki_1+diem_tb_ki_2*2, 1)/3;
+	update diem set hocluc_ki_1=dbo.hocluc1(diem_tb_ki_1);
+	update diem set hocluc_ki_2=dbo.hocluc1(diem_tb_ki_2);
+
+	update diem set hocluc=dbo.hocluc1(diem_tb_canam);
+end
+go 
 
 --KHU VỰC NHẬP DỮ LIỆU VÀO BẢNG
 --nhập bảng lớp 
 insert LOP values
 ('2022_10A', '10A'),
-('2022_10B', '10B');
+('2022_10B', '10B'),
+('2022_10C', '10C');
 go
 
 --nhập bảng giáo viên 
@@ -150,34 +168,92 @@ insert mon_hoc values
 ('HO', N'Hóa', '0007');
 go
 --nhập bảng học sinh
+--nhập học sinh lớp 10A
 insert hocsinh values
-('00001', 'NGUYEN THI DIU','0987654321','NU','2022_10A')
+('00001', 'NGUYEN THI DIU','0987654321','NU','2022_10A'),
+('00002', 'NGUYEN VAN DUNG','0982394743','NAM','2022_10A'),
+('00003', 'DANG THI HONG NHUNG','0456372819','NU','2022_10A'),
+('00004', 'HOANG MINH KHAI','0234561789','NAM','2022_10A'),
+('00005', 'TRAN NGOC NHI','0456123789','NU','2022_10A');
+go
+
+--nhập học sinh lớp 10B
+insert hocsinh values
+('00006', 'TRAN VAN QUYET','0555567749','NAM','2022_10B'),
+('00007', 'NGUYEN THAY HUAN','0678912345','NAM','2022_10B'),
+('00008', 'TRAN VAN DAN','0987612345','NAM','2022_10B'),
+('00009', 'NGUYEN THI THANH TU','0654783921','NU','2022_10B'),
+('00010', 'NGUYEN VAN AI','0999666777','KHONG RO','2022_10B');
+go
+
+--nhập học sinh lớp 10C
+insert hocsinh values
+('00011', 'NGUYEN VAN CO','0888888888','NAM','2022_10C'),
+('00012', 'NGUYEN THI BAP','0555555555','NU','2022_10C'),
+('00013', 'PHAM TRAM LOI','0123456789','NAM','2022_10C'),
+('00014', 'LY THANH MINH','0234561789','NAM','2022_10C'),
+('00015', 'TRAN BOC BACH','0765432198','NU','2022_10C');
 go
 
 --nhập bảng điểm
-
+--nhập điểm học sinh lớp 10A
 insert diem values
-('00001', '2022_10A','TA',1,2,3,4, 0,'tot',NULL,1,2,3,4, 0,'tot',NULL, 0,NULL),
-('00001', '2022_10A','LI',6.5,7,8.0,5.5, 0,'tot',NULL,5.5,7.0,6.5,6.5, 0,'tot',NULL, 0,NULL),
-('00001', '2022_10A','HO',3.5,9.6,7,5.5, 0,'tot',NULL,5.5,7.8,6.5,6.5, 0,'tot',NULL, 0,NULL);
+('00001', '2022_10A','VA',8.5,8.0,8.5,8.5, 0,'tot',NULL,8.0,8.0,8.0,9.5, 0,'tot',NULL, 0,NULL),
+('00001', '2022_10A','TA',8.5,8.0,8.5,8.0, 0,'tot',NULL,8.5,8.0,8.5,8.5, 0,'tot',NULL, 0,NULL),
+('00001', '2022_10A','GDCD',8.5,9.5,8.5,9.5, 0,'tot',NULL,8.5,8.5,8.0,8.5, 0,'tot',NULL, 0,NULL),
+('00002', '2022_10A','GDCD',9.0,9.5,9.0,9.5, 0,'tot',NULL,9.0,8.0,8.5,8.5, 0,'tot',NULL, 0,NULL),
+('00002', '2022_10A','VA',8.0,8.5,9.0,9.5, 0,'tot',NULL,8.5,8.0,8.5,8.5, 0,'tot',NULL, 0,NULL),
+('00002', '2022_10A','TO',8.0,8.5,8.0,8.5, 0,'tot',NULL,8.0,9.0,9.5,10, 0,'tot',NULL, 0,NULL),
+('00003', '2022_10A','GDCD',9.0,9.5,9.0,9.5, 0,'tot',NULL,9.0,9.5,9.5,9.0, 0,'tot',NULL, 0,NULL),
+('00003', '2022_10A','LI',8.5,8.5,8.0,8.5, 0,'tot',NULL,8.0,8.0,8.5,8.0, 0,'tot',NULL, 0,NULL),
+('00003', '2022_10A','TA',8.0,8.5,8.5,8.5, 0,'tot',NULL,8.0,8.0,9.5,9.5, 0,'tot',NULL, 0,NULL),
+('00004', '2022_10A','TO',10.0,10.0,9.5,10.0, 0,'tot',NULL,10.0,9.5,10.0,10.0, 0,'tot',NULL, 0,NULL),
+('00004', '2022_10A','VA',8.0,9.5,9.0,8.5, 0,'tot',NULL,10.0,8.5,9.0,10.0, 0,'tot',NULL, 0,NULL),
+('00004', '2022_10A','TA',8.0,8.5,9.0,9.5, 0,'tot',NULL,8.0,9.0,9.5,9.0, 0,'tot',NULL, 0,NULL),
+('00005', '2022_10A','TO',8.0,8.5,9.0,8.5, 0,'tot',NULL,8.0,9.0,9.5,10, 0,'tot',NULL, 0,NULL),
+('00005', '2022_10A','VA',7.5,8.5,9.0,9.5, 0,'tot',NULL,8.0,9.0,9.5,9.5, 0,'tot',NULL, 0,NULL),
+('00005', '2022_10A','SI',9.0,9.5,8.0,9.5, 0,'tot',NULL,9.0,8.0,9.5,9.0, 0,'tot',NULL, 0,NULL);
 go
 
---UPDATE DỮ LIỆU
+--nhập điểm học sinh lớp 10B
+insert diem values
+('00006', '2022_10B','VA',8.5,9.0,8.5,9.5, 0,'tot',NULL,8.0,9.0,9.0,8.5, 0,'tot',NULL, 0,NULL),
+('00006', '2022_10B','TA',7.5,8.0,8.5,9.0, 0,'tot',NULL,8.5,8.0,8.5,9.5, 0,'tot',NULL, 0,NULL),
+('00006', '2022_10B','GDCD',3.5,2.5,3.2,4.5, 0,'kha',NULL,5.5,3.5,4.0,4.5, 0,'kha',NULL, 0,NULL),
+('00007', '2022_10B','GDCD',9.0,9.5,9.0,9.5, 0,'kha',NULL,9.0,8.0,7.5,9.5, 0,'kha',NULL, 0,NULL),
+('00007', '2022_10B','VA',8.0,8.5,9.0,9.5, 0,'kha',NULL,8.5,8.0,7.5,7.5, 0,'kha',NULL, 0,NULL),
+('00007', '2022_10B','TO',8.0,8.5,8.0,8.5, 0,'tot',NULL,8.0,9.0,9.5,10, 0,'tot',NULL, 0,NULL),--GIỎI NÓI ĐẠO LÍ NHƯNG HƠI THÔ :>
+('00008', '2022_10B','GDCD',9.0,9.5,9.0,9.5, 0,'tot',NULL,9.0,9.5,9.5,9.0, 0,'tot',NULL, 0,NULL),
+('00008', '2022_10B','LI',8.5,8.5,8.0,8.5, 0,'tot',NULL,8.0,8.0,8.5,8.0, 0,'tot',NULL, 0,NULL),
+('00008', '2022_10B','TA',2.0,3.5,2.5,2.5, 0,'tot',NULL,2.0,3.0,3.5,5.5, 0,'tot',NULL, 0,NULL),--TẠI THẤY CHÚA NÓI TIẾNG VIỆT :>
+('00009', '2022_10B','TO',10.0,10.0,9.5,10.0, 0,'tot',NULL,10.0,9.5,10.0,10.0, 0,'tot',NULL, 0,NULL),
+('00009', '2022_10B','VA',8.0,9.5,9.0,8.5, 0,'tot',NULL,10.0,8.5,9.0,10.0, 0,'tot',NULL, 0,NULL),
+('00009', '2022_10B','TA',8.0,8.5,9.0,9.5, 0,'tot',NULL,8.0,9.0,9.5,9.0, 0,'tot',NULL, 0,NULL),
+('00010', '2022_10B','TO',8.0,8.5,9.0,8.5, 0,'tot',NULL,8.0,9.0,9.5,10, 0,'tot',NULL, 0,NULL),
+('00010', '2022_10B','VA',7.5,8.5,9.0,9.5, 0,'tot',NULL,8.0,9.0,9.5,9.5, 0,'tot',NULL, 0,NULL),
+('00010', '2022_10B','SI',9.0,9.5,8.0,9.5, 0,'tot',NULL,9.0,8.0,9.5,9.0, 0,'tot',NULL, 0,NULL);--GIỎI SINH NHƯNG KO RÕ GIỚI TÍNH ???
+--COMMENT CHO VUI ĐỪNG CHO VÀO BÀI NHA ;P 
+go
 
---TẠO TRIGGER 
---update khi insert dữ liệu vào
-create trigger capnhat on diem after insert 
-as
-begin 
-	print'trigger'
-	update diem set diem_tb_ki_1=ROUND(dbo.TB(diem_mieng_ki_1 ,diem_15_ki_1, diem_45_ki_1, diem_cuoiki_ki_1), 1);
-	update diem set diem_tb_ki_2=round(dbo.TB(diem_mieng_ki_2 ,diem_15_ki_2, diem_45_ki_2, diem_cuoiki_ki_2), 1);
-	update diem set diem_tb_canam=ROUND(diem_tb_ki_1+diem_tb_ki_2*2, 1)/3;
-	update diem set hocluc_ki_1=dbo.hocluc1(diem_tb_ki_1);
-	update diem set hocluc_ki_2=dbo.hocluc1(diem_tb_ki_2);
+--nhập điểm học sinh lớp 10C
+insert diem values
+('00011', '2022_10C','SI',9.0,8.5,8.5,9.0, 0,'tot',NULL,8.5,8.0,9.0,9.5, 0,'tot',NULL, 0,NULL),
+('00011', '2022_10C','GDCD',8.5,8.0,8.5,8.0, 0,'tot',NULL,8.5,8.0,8.5,8.5, 0,'tot',NULL, 0,NULL),
+('00011', '2022_10C','TO',5.5,5.5,6.5,6.5, 0,'tot',NULL,6.0,6.5,7.0,6.5, 0,'tot',NULL, 0,NULL),
+('00012', '2022_10C','SI',9.0,9.5,9.0,9.5, 0,'tot',NULL,9.0,8.0,8.5,8.5, 0,'tot',NULL, 0,NULL),
+('00012', '2022_10C','GDCD',8.0,8.5,9.0,9.5, 0,'tot',NULL,8.5,8.0,8.5,8.5, 0,'tot',NULL, 0,NULL),
+('00012', '2022_10C','TO',5.0,5.5,6.0,6.5, 0,'tot',NULL,5.0,6.0,7.5,7.0, 0,'tot',NULL, 0,NULL),
+('00013', '2022_10C','GDCD',5.0,5.5,5.0,5.5, 0,'kha',NULL,5.0,5.5,5.5,5.0, 0,'kha',NULL, 0,NULL),
+('00013', '2022_10C','TA',6.5,6.5,6.0,6.5, 0,'kha',NULL,6.0,6.0,6.5,6.0, 0,'kha',NULL, 0,NULL),
+('00013', '2022_10C','HO',5.0,4.5,4.5,5.5, 0,'kha',NULL,4.0,5.0,5.5,4.5, 0,'kha',NULL, 0,NULL),
+('00014', '2022_10C','VA',10.0,10.0,9.5,10.0, 0,'kha',NULL,10.0,9.5,10.0,10.0, 0,'kha',NULL, 0,NULL),
+('00014', '2022_10C','TA',8.0,9.5,9.0,8.5, 0,'kha',NULL,10.0,8.5,9.0,10.0, 0,'kha',NULL, 0,NULL),
+('00014', '2022_10C','GDCD',5.0,5.5,5.0,5.5, 0,'kha',NULL,5.0,5.0,5.5,5.0, 0,'kha',NULL, 0,NULL),
+('00015', '2022_10C','TO',8.0,8.5,9.0,8.5, 0,'tot',NULL,8.0,9.0,9.5,10, 0,'tot',NULL, 0,NULL),
+('00015', '2022_10C','VA',6.5,6.5,7.0,7.5, 0,'tot',NULL,6.0,6.0,7.5,6.5, 0,'tot',NULL, 0,NULL),
+('00015', '2022_10C','LI',8.0,8.5,8.0,8.5, 0,'tot',NULL,8.0,8.0,7.5,9.0, 0,'tot',NULL, 0,NULL);
+go
 
-	update diem set hocluc=dbo.hocluc1(diem_tb_canam);
-end
 select * from lop
 select * from giaovien
 select * from hocsinh
