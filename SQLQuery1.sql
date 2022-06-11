@@ -171,6 +171,52 @@ begin
 	@diem_mieng_ki_2, @diem_15_ki_2, @diem_45_ki_2, @diem_cuoiki_ki_2, @diem_tb_ki_2, @ghichu_ki_1, @hocluc_ki_2,@diem_tb_canam, @hocluc)
 end
 go
+--thủ tục xóa dư liệu bảng lớp
+create proc sp_xoalop  @malop char(10)
+as
+begin 
+	if(exists(select * from diem where @malop like malop))	print N'lớp đang còn ràng buộc với bảng điểm, hãy xóa ở bảng điểm trước'
+	else if(exists(select *from hocsinh where @malop like malop)) print N'lớp học này còn tồn tại ở bảng học sinh, hãy xóa ở đó trước'
+	else delete from lop where @malop like malop
+end
+go
+
+--thủ tuc xóa bảng học sinh
+create proc sp_xoahocsinh  @mahs char(10)
+as
+begin 
+	if(exists(select * from diem where @mahs like mahs))	print N'sinh viên đang còn ràng buộc với bảng điểm, hãy xóa ở bảng điểm trước'
+	else delete from hocsinh where @mahs like mahs
+end
+go
+
+--thủ tục xóa bảng giáo viên
+create proc sp_xoagiaovien  @magv char(10)
+as
+begin 
+	if(exists(select * from mon_hoc where @magv like magv))	print N'giáo viên đang còn ràng buộc với bảng môn học, hãy xóa ở đó trước'
+	else delete from giaovien where @magv like magv
+end
+go
+
+--thủ tuc xóa môn học
+create proc sp_xoamonhoc  @mamh char(10)
+as
+begin 
+	if(exists(select * from diem where @mamh like mamh))	print N'môn học đang còn ràng buộc với bảng điểm, hãy xóa ở đó trước'
+	else if(not exists(select * from mon_hoc where @mamh like mamh)) print N'môn học này không tồn tại, hãy nhập lại'
+	else delete from mon_hoc where @mamh like mamh
+end
+go
+
+--thủ tục xóa bảng điểm
+create proc sp_xoadiem @mahs char(10), @mamh char(10)
+as
+begin
+	if(not exists(select * from diem where @mahs like mahs or @mamh like mamh))  print N'điểm này không đúng, vui lòng nhập lại'
+end
+go
+
 
 --UPDATE DỮ LIỆU
 
