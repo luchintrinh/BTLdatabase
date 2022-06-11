@@ -119,6 +119,58 @@ begin
 	return @xet
 end;
 go
+--KHU VỰC TẠO THỦ TỤC HÀM 
+--thủ tục nhập bảng lớp
+create proc sp_nhaplop @malop  char(10), @tenlop nvarchar(100)
+as
+begin
+	if(exists(select *from lop where @malop=malop)) print N'Lớp này đã tồn tại'
+	else insert into lop values(@malop, @tenlop)
+end
+go
+ 
+--thủ tục nhập bảng môn học
+create proc sp_nhapmonhoc @mamh char(10), @ten_mon_hoc nvarchar(100), @magv char(10)
+as
+begin
+	if(not exists(select *from giaovien where magv like @magv))  print N'giao viên môn này chưa tồn tại'
+	else if(exists(select *from mon_hoc where mamh like @mamh)) print N'môn học này đã tồn tại'
+	else insert into mon_hoc values(@mamh, @ten_mon_hoc, @magv)
+end
+go
+exec sp_nhapmonhoc 'TTT', N'toán rời rạc', '0001'
+
+--thủ tục nhập bảng giảng viên
+create proc sp_nhapgv @magv char(10), @tengv nvarchar(100), @sdt char(15), @diachi nvarchar(100), @gioitinh varchar(15), @email char(50)
+as
+begin
+	if(exists(select *from giaovien where magv like @magv))  print N'giáo viên môn này đã tồn tại tồn tại'
+	else insert into giaovien values(@magv, @tengv, @sdt, @diachi, @gioitinh, @email)
+end
+go
+--thủ tục nhập hàm lớp
+create proc sp_nhahs @mahs char(10), @tenhs nvarchar(50), @sdt_phuhuynh char(15), @gioitinh varchar(15), @malop char(10)
+as
+begin
+	if(exists(select *from hocsinh where @mahs=mahs)) print N'Sinh viên này đã tồn tại'
+	else if(not exists(select * from lop where @malop like malop)) print N'lớp học này chưa tồn tại '
+	else insert into hocsinh values(@mahs, @tenhs, @sdt_phuhuynh, @gioitinh, @malop)
+end
+go
+--thủ tục nhập diểm
+create proc sp_nhapdiem @mahs char(10), @malop char(10), @mamh char(10), @diem_mieng_ki_1 float, @diem_15_ki_1 float , @diem_45_ki_1 float, @diem_cuoiki_ki_1 float, @diem_tb_ki_1 float, @ghichu_ki_1 nvarchar(50),
+@hocluc_ki_1 nvarchar(20), @diem_mieng_ki_2 float, @diem_15_ki_2 float, @diem_45_ki_2 float, @diem_cuoiki_ki_2 float, @diem_tb_ki_2 float, @ghichu_ki_2 nvarchar(50), @hocluc_ki_2 nvarchar(20),
+@diem_tb_canam float, @hocluc nvarchar(20)
+as
+begin
+	if(exists(select *from diem where mahs like @mahs and mamh like @mamh))	print N'Điểm này đã tồn tại'
+	else if(not exists(select * from hocsinh where mahs like @mahs))	print N'Sinh viên này chưa tồn tại, hãy bổ sung thêm tại bảng sinh viên'
+	else if(not exists(select *from lop where malop like @malop))	print N'Lớp học này chưa tồn tại, hãy bổ sung thêm tại bảng lớp'
+	else if(not exists(select * from mon_hoc where mamh like @mamh))	print N'môn học này chưa tồn tại, hay bổ sung thêm môn học này'
+	else insert into diem values(@mahs, @malop, @mamh, @diem_mieng_ki_1, @diem_15_ki_1, @diem_45_ki_1, @diem_cuoiki_ki_1, @diem_tb_ki_1, @ghichu_ki_1, @hocluc_ki_1,
+	@diem_mieng_ki_2, @diem_15_ki_2, @diem_45_ki_2, @diem_cuoiki_ki_2, @diem_tb_ki_2, @ghichu_ki_1, @hocluc_ki_2,@diem_tb_canam, @hocluc)
+end
+go
 
 --UPDATE DỮ LIỆU
 
