@@ -207,10 +207,12 @@ end
 go
 
 --thủ tục xóa bảng điểm
+
 create proc sp_xoadiem @mahs char(10), @mamh char(10)
 as
 begin
 	if(not exists(select * from diem where @mahs like mahs or @mamh like mamh))  print N'điểm này không đúng, vui lòng nhập lại'
+	else delete from diem where @mahs like mahs and @mamh like mamh
 end
 go
 --thủ tục in thông tin sinh viên theo msv
@@ -375,8 +377,9 @@ create view sinhvientong
 as
 	select mahs, tenhs, gioitinh, malop, round(avg(diemtrungbinh), 1) as dtb from tim_sinh_vien
 	group by mahs, tenhs, gioitinh, malop
+go
 select * from sinhvientong
-************CÁC THỦ TỤC TRUY VẤN**********************
+--************CÁC THỦ TỤC TRUY VẤN**********************
 --1. in ra học lực sinh viên
 --tìm học sinh có mã học sinh 00001
 	exec sp_inthongtin '00001'
@@ -398,3 +401,10 @@ select * from giaovien
 select * from hocsinh
 select * from mon_hoc
 select * from diem
+
+
+--exec sp_nhapdiem '00015','HO',9.0,8.0,7.0,8.5,0,'tot',NULL,7.5,8.0,8.5,8.0,0,'tot',NULL,0,NULL
+
+SELECT * FROM diem WHERE mahs='00015'
+
+EXEC sp_xoadiem '00015','HO'
