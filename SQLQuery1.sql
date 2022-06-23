@@ -1,4 +1,8 @@
-﻿create database quanlidiemsv
+﻿if exists(select name from sys.databases where name='quanlidiemsv')
+drop database quanlidiemsv
+go
+
+create database quanlidiemsv
 go
 
 use quanlidiemsv
@@ -242,10 +246,9 @@ begin
 	update diem set diem_tb_canam=ROUND(diem_tb_ki_1+diem_tb_ki_2*2, 1)/3;
 	update diem set hocluc_ki_1=dbo.hocluc1(diem_tb_ki_1);
 	update diem set hocluc_ki_2=dbo.hocluc1(diem_tb_ki_2);
-
 	update diem set hocluc=dbo.hocluc1(diem_tb_canam);
 end
-go 
+go
 
 --*****************************************************KHU VỰC NHẬP DỮ LIỆU VÀO BẢNG*************************************************************
 --nhập bảng lớp 
@@ -401,10 +404,3 @@ select * from giaovien
 select * from hocsinh
 select * from mon_hoc
 select * from diem
-
-
---exec sp_nhapdiem '00015','HO',9.0,8.0,7.0,8.5,0,'tot',NULL,7.5,8.0,8.5,8.0,0,'tot',NULL,0,NULL
-
-SELECT * FROM diem WHERE mahs='00015'
-
-EXEC sp_xoadiem '00015','HO'

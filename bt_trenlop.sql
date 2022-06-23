@@ -37,4 +37,10 @@ create table phanphong(
 	denngay date)
 go
 
-create 
+insert into NV menu(
+'a01',N'trình','26/02/2002',N'nam','0986589874')
+select *from NV
+select *from ktx
+select *from Phong
+select *from SV
+select *from phanphong 
