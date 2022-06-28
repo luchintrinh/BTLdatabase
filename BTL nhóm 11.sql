@@ -589,6 +589,18 @@ FROM mh, dbo.gv
 WHERE mh.gv_ma=gv.gv_ma
 
 
+--XIII. hiển thị top 3 sinh viên có điểm cao nhất
+
+SELECT TOP(3) dbo.hs.hs_ma, dbo.hs.hs_ten, lop.lop_ten, dbo.ca_nam.ca_nam_dtb, dbo.ca_nam.ca_nam_hocluc, dbo.ca_nam.ca_nam_hk
+FROM dbo.lop, dbo.hs, dbo.ca_nam
+WHERE dbo.lop.lop_ma=dbo.hs.lop_ma AND dbo.hs.hs_ma=dbo.ca_nam.hs_ma
+
+--XIV. đếm học sinh học nhiều môn nhất
+
+SELECT hs_ma, COUNT(mh_ma) AS soluong FROM dbo.diemmh
+GROUP BY hs_ma
+HAVING COUNT(mh_ma)>=ALL
+(SELECT COUNT(mh_ma) AS SL FROM dbo.diemmh GROUP BY mh_ma)
 
 
 
