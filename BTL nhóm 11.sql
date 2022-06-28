@@ -1,11 +1,14 @@
 ﻿IF(EXISTS(SELECT name FROM sys.databases WHERE name='BTLNHOM11'))
 DROP DATABASE BTLNHOM11
 GO
+
 CREATE DATABASE BTLNHOM11
 GO
+
 USE BTLNHOM11
 GO
---tạo bảng khối
+
+--TẠO BẢNG KHỐI
 
 CREATE TABLE khoi
 (
@@ -14,7 +17,8 @@ CREATE TABLE khoi
 );
 GO
 
---tạo bảng lớp
+--TẠO BẢNG LỚP
+
 CREATE TABLE lop
 (
 	lop_ma CHAR(10) PRIMARY KEY,
@@ -23,7 +27,8 @@ CREATE TABLE lop
 );
 GO
 
---tạo bảng học sinh 
+--TẠO BẢNG HỌC SINH
+
 CREATE TABLE hs
 (	
 	hs_ma CHAR(10) PRIMARY KEY,
@@ -35,7 +40,9 @@ CREATE TABLE hs
 	hs_sdt CHAR(10) NOT NULL
 );
 GO
---tọa bảng giáo viên
+
+--TẠO BẢNG GIÁO VIÊN
+
 CREATE TABLE gv
 (
 	gv_ma CHAR(10) PRIMARY KEY,
@@ -45,7 +52,9 @@ CREATE TABLE gv
 	gv_sdt CHAR(10) NOT NULL
 );
 GO
---tạo bảng môn học
+
+--TẠO BẢNG MÔN HỌC
+
 CREATE TABLE mh
 (
 	mh_ma CHAR(10) PRIMARY KEY,
@@ -53,37 +62,25 @@ CREATE TABLE mh
 	gv_ma CHAR(10) REFERENCES gv(gv_ma)
 );
 GO
---tạo bảng điểm học kì 1 
-CREATE TABLE ki_1
+
+--TẠO BẢNG ĐIỂM MÔN HỌC
+
+CREATE TABLE diemmh
 (	
 	hs_ma CHAR(10) REFERENCES dbo.hs(hs_ma),
 	mh_ma CHAR(10) REFERENCES mh(mh_ma),
-	ki_1_diem1 FLOAT CHECK(ki_1_diem1<=10.0),
-	ki_1_diem2 FLOAT CHECK(ki_1_diem2<=10.0),
-	ki_1_diem3 FLOAT CHECK(ki_1_diem3<=10.0),
-	ki_1_diemtk FLOAT,--điểm trung bình
-	ki_1_hk NCHAR(20),--hạnh kiểm
-	ki_1_hl NCHAR(20), --học lực
+	diem1 FLOAT CHECK(diem1<=10.0),
+	diem2 FLOAT CHECK(diem2<=10.0),
+	diem3 FLOAT CHECK(diem3<=10.0),
+	diemtk FLOAT--điểm trung bình
 );
 GO
---tạo bảng điểm kì 2
-CREATE TABLE ki_2
-(	
-	hs_ma CHAR(10) REFERENCES dbo.hs(hs_ma),
-	mh_ma CHAR(10) REFERENCES mh(mh_ma),
-	ki_2_diem1 FLOAT CHECK(ki_2_diem1<=10.0),
-	ki_2_diem2 FLOAT CHECK(ki_2_diem2<=10.0),
-	ki_2_diem3 FLOAT CHECK(ki_2_diem3<=10.0),
-	ki_2_diemtk FLOAT, --điểm trung bình
-	ki_2_hk NCHAR(20),--hạnh kiểm
-	ki_2_hl NCHAR(20), --học lực
-);
-GO
---tạo bảng điểm cả năm
+
+--TẠO BẢNG ĐIỂM TỔNG KẾT
+
 CREATE TABLE ca_nam
 (	
 	hs_ma CHAR(10) REFERENCES dbo.hs(hs_ma),
-	mh_ma CHAR(10) REFERENCES mh(mh_ma),
 	ca_nam_dtb FLOAT,
 	ca_nam_hocluc NCHAR(20),
 	ca_nam_hk NCHAR(20) NOT NULL
@@ -91,7 +88,73 @@ CREATE TABLE ca_nam
 GO
 
 
+--TẠO VIEW ĐIỂM SINH VIÊN TRONG LỚP 
+CREATE VIEW v_tonghop
+AS
+SELECT dbo.khoi.khoi_ma, dbo.khoi.khoi_ten, dbo.lop.lop_ten, dbo.lop.lop_ma, hs.hs_ma, dbo.hs.hs_ten, hs.hs_gioitinh, hs.hs_ngaysinh, hs.hs_diachi, hs.hs_sdt, dbo.mh.mh_ten, dbo.gv.gv_ten, dbo.diemmh.diem1, dbo.diemmh.diem2, dbo.diemmh.diem3, dbo.diemmh.diemtk
+FROM dbo.khoi, dbo.lop, dbo.hs, dbo.mh, dbo.gv, dbo.diemmh
+WHERE  khoi.khoi_ma=dbo.lop.khoi_ma AND lop.lop_ma=dbo.hs.lop_ma AND hs.hs_ma=dbo.diemmh.hs_ma AND dbo.mh.mh_ma=dbo.diemmh.mh_ma AND gv.gv_ma=mh.gv_ma
+GO
+
+
+--********************THỦ TỤC IN RA THÔNG TIN ĐIÊM CỦA HS THEO MÃ HỌC SINH************
+CREATE PROC sp_hstheoma @mahs CHAR(10)
+AS
+BEGIN
+    IF(NOT EXISTS(SELECT hs_ma FROM v_tonghop WHERE hs_ma=@mahs)) PRINT N'học sinh này không tồn tại, vui lòng kiểm tra lại'
+	ELSE 
+		BEGIN
+			DECLARE @dtb FLOAT 
+			DECLARE @hl NCHAR(10)
+			DECLARE @hk NCHAR(10)
+			SELECT @dtb=ca_nam_dtb FROM dbo.ca_nam WHERE hs_ma=@mahs
+			SELECT @hl=ca_nam_hocluc FROM dbo.ca_nam WHERE hs_ma=@mahs
+			SELECT @hk=ca_nam_hk FROM dbo.ca_nam WHERE hs_ma=@mahs
+			SELECT * FROM v_tonghop WHERE @mahs=hs_ma ORDER BY diemtk DESC --sắp xếp theo thứ tự giảm dần, nếu tăng dần ASC
+			PRINT (N'điểm trung bình cả năm: '+ CONVERT(NVARCHAR, CONVERT(NVARCHAR, @dtb) ))
+			PRINT (N'học lực cả năm: '+ CONVERT(NVARCHAR, @hl))
+			PRINT (N'hạnh kiểm cả năm: ')+CONVERT(NVARCHAR, @hk)
+		END
+END
+GO
+
+
+
+
+--*******************THỦ TỤC IN BẢNG ĐIỂM CÁC MÔN CỦA HỌC SINH THEO LỚP ***********
+CREATE PROC sp_svtheolop @malop CHAR(10)
+AS
+BEGIN
+    IF(NOT EXISTS(SELECT lop_ma FROM dbo.lop WHERE lop_ma=@malop )) PRINT N'lớp này không tồn tại, hãy kiểm tra lại !!'
+	ELSE SELECT khoi.khoi_ten, lop.lop_ten, hs.hs_ten, dbo.ca_nam.ca_nam_dtb, dbo.ca_nam.ca_nam_hocluc, dbo.ca_nam.ca_nam_hk 
+	FROM dbo.khoi, dbo.lop, dbo.hs, dbo.ca_nam
+	WHERE dbo.khoi.khoi_ma=dbo.lop.khoi_ma AND dbo.lop.lop_ma=dbo.hs.lop_ma AND dbo.hs.hs_ma=dbo.ca_nam.hs_ma AND @malop= dbo.lop.lop_ma
+	ORDER BY hs.hs_ten
+END
+GO
+
+
+--*******************THỦ TỤC ĐẾM SỐ HỌC SINH CỦA TỪNG LỚP*************
+CREATE PROC sp_demsv 
+AS
+BEGIN
+    SELECT lop_ma, COUNT(hs_ma) AS soluong FROM v_tonghop GROUP BY lop_ma 
+END
+GO
+
+--******************FUNCTION ĐẾM SỐ HỌC SINH HẠNH KIỂM KHÁ**********************
+CREATE FUNCTION f_demhkkha ()
+RETURNS int
+AS
+BEGIN
+    DECLARE @dem INT 
+	SELECT @dem=COUNT(hs_ma) FROM dbo.ca_nam WHERE ca_nam_hk=N'khá'
+	RETURN @dem
+END
+GO
+
 --***************TẠO FUNCTION XÉT HỌC LỰC HỌC SINH*****************
+
 CREATE FUNCTION f_xethocluc (@dtb FLOAT)
 RETURNS NCHAR(20)
 AS
@@ -107,70 +170,82 @@ END
 GO
 
 --****************TẠO TRIGGER***************
+
 --tính điểm trung bình kì 1
-CREATE TRIGGER trg_tinhdtb1 ON dbo.ki_1 AFTER INSERT
-AS
-BEGIN
-    UPDATE dbo.ki_1 SET ki_1_diemtk=ROUND((ki_1_diem1+ki_1_diem2*2+ki_1_diem3*3)/6, 1)
-END
-GO
 
---tính điểm trung bình kì 2
-CREATE TRIGGER trg_tinhdtb2 ON dbo.ki_2 AFTER INSERT
+CREATE  TRIGGER trg_tinhdtb ON dbo.diemmh AFTER INSERT
 AS
 BEGIN
-    UPDATE dbo.ki_2 SET ki_2_diemtk=ROUND((ki_2_diem1+ki_2_diem2*2+ki_2_diem3*3)/6, 1)
-END
-GO
+    UPDATE dbo.diemmh SET diemtk=ROUND((diem1+diem2*2+diem3*3)/6, 1)
 
---xét học lực cho học sinh bảng 1
-CREATE TRIGGER trg_hocluc1 ON dbo.ki_1 AFTER INSERT 
-AS
-BEGIN
-	UPDATE dbo.ki_1 SET ki_1_hl=dbo.f_xethocluc(ki_1_diemtk)
-END
-GO
-
---xét học lực kì 2
-CREATE TRIGGER trg_hocluc2 ON dbo.ki_2 AFTER INSERT 
-AS
-BEGIN
-	UPDATE dbo.ki_2 SET ki_2_hl=dbo.f_xethocluc(ki_2_diemtk)
-END
-GO
-
---tính điểm trung bình bảng cả năm khi thêm điểm kì 1
-CREATE TRIGGER trg_tinhtoan1 ON dbo.ki_1 AFTER UPDATE
-AS
-BEGIN
-    UPDATE dbo.ca_nam SET ca_nam_dtb=ROUND((ki_1_diemtk+ki_2_diemtk*2)/3, 1) FROM dbo.ki_1, dbo.ki_2, dbo.hs, dbo.mh WHERE ca_nam.hs_ma=hs.hs_ma AND dbo.ca_nam.mh_ma=mh.mh_ma
-	AND dbo.ki_1.hs_ma=hs.hs_ma AND dbo.ki_1.mh_ma=mh.mh_ma AND ki_2.hs_ma=hs.hs_ma AND ki_2.hs_ma=hs.hs_ma AND ki_2.mh_ma=mh.mh_ma
 END
 GO
 
 
---tính điểm trung bình bảng cả năm khi thêm điểm kì 2
-alter TRIGGER trg_tinhtoan2 ON dbo.ki_2 AFTER UPDATE
+--*********TÍNH ĐIỂM TRUNG BÌNH TẤT CẢ CÁC MÔN CỦA 1 HỌC SINH*************
+
+
+CREATE FUNCTION f_dtbcanam (@mahs CHAR(10))
+RETURNS FLOAT
 AS
 BEGIN
-	DECLARE @tb1 FLOAT
-    DECLARE @tb2 FLOAT
-	SELECT @tb1=AVG(dbo.ki_1.ki_1_diemtk) FROM dbo.ki_1 GROUP BY hs_ma
-	SELECT @tb1=AVG(dbo.ki_2.ki_2_diemtk) FROM dbo.ki_2 GROUP BY hs_ma
-    UPDATE dbo.ca_nam SET ca_nam_dtb=ROUND((@tb1+@tb2*2)/3, 1) FROM dbo.ki_1, dbo.ki_2, dbo.hs, dbo.mh WHERE ca_nam.hs_ma=hs.hs_ma AND dbo.ca_nam.mh_ma=mh.mh_ma
-	AND dbo.ki_1.hs_ma=hs.hs_ma AND dbo.ki_1.mh_ma=mh.mh_ma AND ki_2.hs_ma=hs.hs_ma AND ki_2.hs_ma=hs.hs_ma AND ki_2.mh_ma=mh.mh_ma
+	DECLARE @dtb FLOAT
+	SELECT @dtb= AVG(diemtk) FROM dbo.diemmh GROUP BY hs_ma HAVING @mahs=hs_ma
+	RETURN @dtb
 END
 GO
---xét học lực cho bảng cả năm 
-CREATE TRIGGER trg_xethocluccanam ON dbo.ca_nam AFTER UPDATE
+
+--************TRIGGER TÍNH HỌC LỰC, HẠNH KIỂM BẢNG ĐIỂM CẢ NĂM HỌC*************
+
+
+CREATE TRIGGER trg_capnhatdiemcanam ON dbo.diemmh AFTER INSERT
 AS
 BEGIN
-    UPDATE dbo.ca_nam SET ca_nam_hocluc=dbo.f_xethocluc(ca_nam_dtb)
+	UPDATE dbo.ca_nam SET ca_nam_dtb=dbo.f_dtbcanam(hs_ma)
+	UPDATE dbo.ca_nam SET ca_nam_hocluc=dbo.f_xethocluc(ca_nam_dtb)
 END
 GO
+
+
+--UPDATE ĐIỂM THÀNH PHẦN 
+
+
+CREATE PROC sp_thaydoi @mahs CHAR(10), @mamh CHAR(10), @diem1 FLOAT, @diem2 FLOAT, @diem3 FLOAT
+AS
+BEGIN
+	IF(NOT EXISTS(SELECT hs_ma, mh_ma FROM dbo.diemmh WHERE hs_ma=@mahs AND mh_ma=@mamh)) PRINT N'môn học môn học của học sinh này không tồn tại'
+	ELSE UPDATE dbo.diemmh SET diem1=@diem1, diem2=@diem2, diem3=@diem3 WHERE mh_ma=@mamh AND hs_ma=@mahs 
+END
+GO
+EXEC dbo.sp_thaydoi @mahs = 'HS1',   -- char(10)
+                    @mamh = 'MH1',   -- char(10)
+                    @diem1 = 5.0, -- float
+                    @diem2 = 9.5, -- float
+                    @diem3 = 9.6  -- float
+
+
+SELECT * FROM dbo.ca_nam
+SELECT * FROM dbo.diemmh
+
+
+
+--TẠO TRIGGER ĐỂ UPDATE ĐIỂM VÀ HỌC LỰC SAU KHI THAY ĐỔI ĐIỂM THÀNH PHẦN
+
+
+CREATE TRIGGER trg_capnhat ON dbo.diemmh AFTER UPDATE
+AS
+BEGIN
+	UPDATE dbo.diemmh SET diemtk=(diem1+diem2*2+diem3*3)/6 
+	UPDATE dbo.ca_nam SET ca_nam_dtb=dbo.f_dtbcanam(hs_ma)
+	UPDATE dbo.ca_nam SET ca_nam_hocluc=dbo.f_xethocluc(ca_nam_dtb)
+END
+GO
+
 
 
 ----****************************NHẬP NHẬP DỮ LIỆU******************
+
+
 --nhập khối 10, 11, 12 với mã lần lượt là: K1, K2, K3
 INSERT INTO dbo.khoi
 (
@@ -221,6 +296,8 @@ EXEC dbo.sp_nhaplop @malop = 'L2',  -- char(10)
 EXEC dbo.sp_nhaplop @malop = 'L3',  -- char(10)
                     @makhoi = 'K3', -- char(10)
                     @tenlop = N'12A' -- nvarchar(50)
+GO
+
 
 --nhập bảng sinh viên
 --nhập mã học sinh dạng HS1, HS2, ..............
@@ -262,6 +339,8 @@ EXEC sp_nhaphs 'HS1', 'L1', N'Lù Chín Trình', N'nam', '2002-02-26', N'Lào Ca
 EXEC sp_nhaphs 'HS2', 'L1', N'Vũ Thị Tuyết', N'nữ', '2002-08-09', N'Ninh Bình', '025615122'
 EXEC sp_nhaphs 'HS3', 'L2', N'Nguyễn Thành Đạt', N'nam', '2002-09-07', N'Hải Dương', '0218755'
 EXEC sp_nhaphs 'HS4', 'L3', N'Lê Phương Thảo', N'nữ', '2002-01-17', N'Hà Nội', '026516455'
+GO
+
 
 --nhập giảng viên
 --cú pháp mã GV: GV1, GV2,.............
@@ -294,6 +373,8 @@ VALUES
     N'Hà Nội', -- gv_diachi - nvarchar(100)
     '012626566'   -- gv_sdt - char(10)
     )
+	GO
+    
 
 --nhập bảng môn học
 --mã môn học theo cấu trúc: MH1, MH2,...
@@ -319,121 +400,204 @@ GO
 EXEC sp_nhapmh 'MH1', N'Hóa học', 'GV2'
 EXEC sp_nhapmh 'MH2', N'Toán', 'GV1'
 EXEC sp_nhapmh 'MH3', N'Văn', 'GV3'
+GO
 
 
---Nhập bảng điểm kì 1
 
-CREATE PROC sp_nhapdiem1 
+--Nhập bảng điểm môn học
+
+CREATE PROC sp_nhapdiemmh
 	@hs_ma CHAR(10),
 	@mh_ma CHAR(10),
-	@ki_1_diem1 FLOAT,
-	@ki_1_diem2 FLOAT,
-	@ki_1_diem3 FLOAT,
-	@ki_1_diemtk FLOAT,--điểm trung bình
-	@ki_1_hk NCHAR(20),--hạnh kiểm
-	@ki_1_hl NCHAR(20) --học lực
+	@diem1 FLOAT,
+	@diem2 FLOAT,
+	@diem3 FLOAT,
+	@diemtk FLOAT,
+	@HK NCHAR(10)
 AS
  BEGIN
-     IF(EXISTS(SELECT mh_ma, hs_ma FROM dbo.ki_1 WHERE mh_ma=@mh_ma AND hs_ma=@hs_ma)) PRINT N'sinh viên với bộ môn này đã có điểm'
+     IF(EXISTS(SELECT mh_ma, hs_ma FROM dbo.diemmh WHERE mh_ma=@mh_ma AND hs_ma=@hs_ma)) PRINT N'sinh viên với bộ môn này đã có điểm'
 	 ELSE IF(NOT EXISTS(SELECT mh_ma FROM dbo.mh WHERE mh_ma=@mh_ma)) PRINT N'Môn học này chưa tồn tại'
 	 ELSE IF(NOT EXISTS(SELECT hs_ma FROM dbo.hs WHERE hs_ma=@hs_ma)) PRINT N'Học sinh này chưa tồn tại'
-	 ELSE INSERT INTO dbo.ki_1
+	 ELSE INSERT INTO dbo.diemmh
 	 (
 	     hs_ma,
 	     mh_ma,
-	     ki_1_diem1,
-	     ki_1_diem2,
-	     ki_1_diem3,
-	     ki_1_diemtk,
-	     ki_1_hk,
-	     ki_1_hl
+	     diem1,
+	     diem2,
+	     diem3,
+	     diemtk
 	 )
 	 VALUES
 	 (   @hs_ma,  -- hs_ma - char(10)
 	     @mh_ma,  -- mh_ma - char(10)
-	     @ki_1_diem1, -- ki_1_diem1 - float
-	     @ki_1_diem2, -- ki_1_diem2 - float
-	     @ki_1_diem3, -- ki_1_diem3 - float
-	     @ki_1_diemtk, -- ki_1_diemtk - float
-	     @ki_1_hk, -- ki_1_hk - nchar(20)
-	     @ki_1_hl  -- ki_1_hl - nchar(20)
-	     )
+	     @diem1, -- diem1 - float
+	     @diem2, -- diem2 - float
+	     @diem3, -- diem3 - float
+	     @diemtk -- diemtk - float
+	   )
+		IF(NOT EXISTS(SELECT hs_ma FROM dbo.ca_nam WHERE hs_ma=@hs_ma))
+		INSERT INTO dbo.ca_nam
+		(
+		    hs_ma,
+		    ca_nam_dtb,
+		    ca_nam_hocluc,
+		    ca_nam_hk
+		)
+		VALUES
+		(   @hs_ma,  -- hs_ma - char(10)
+		    0.0, -- ca_nam_dtb - float
+		    N'', -- ca_nam_hocluc - nchar(20)
+		    @HK  -- ca_nam_hk - nchar(20)
+		    )
  END
  GO
- EXEC sp_nhapdiem1 'HS1', 'MH1', 6, 9, 5.6, NULL, N'Tốt',NULL
-  EXEC sp_nhapdiem1 'HS2', 'MH1', 7, 7, 7.6, NULL, N'Tốt',NULL
-   EXEC sp_nhapdiem1 'HS3', 'MH2', 6, 9, 5.6, NULL, N'Khá',NULL
-    EXEC sp_nhapdiem1 'HS4', 'MH3', 8, 9, 4.6, NULL, N'Tốt',NULL
-	EXEC sp_nhapdiem1 'HS2', 'MH2', 5, 3, 8.6, NULL, N'Tốt',NULL
+
+ EXEC sp_nhapdiemmh 'HS1', 'MH1', 6, 9, 5.6, NULL, N'tốt'
+  EXEC sp_nhapdiemmh 'HS2', 'MH1', 7, 7, 7.6, NULL, N'khá'
+   EXEC sp_nhapdiemmh 'HS3', 'MH2', 6, 9, 5.6, NULL, N'tốt'
+    EXEC sp_nhapdiemmh 'HS4', 'MH3', 8, 9, 4.6, NULL, N'tốt'
+	EXEC sp_nhapdiemmh 'HS2', 'MH2', 5, 3, 8.6, NULL, N'khá'
+GO
 
 
---nhập điểm kì 2
-CREATE PROC sp_nhapdiem2 
-	@hs_ma CHAR(10),
-	@mh_ma CHAR(10),
-	@ki_2_diem1 FLOAT,
-	@ki_2_diem2 FLOAT,
-	@ki_2_diem3 FLOAT,
-	@ki_2_diemtk FLOAT,--điểm trung bình
-	@ki_2_hk NCHAR(20),--hạnh kiểm
-	@ki_2_hl NCHAR(20) --học lực
+
+
+
+
+
+
+--**************THỦ TUC XÓA DỮ LIỆU*****************
+--xóa khối
+CREATE PROC sp_xoakhoi @makhoi CHAR(10)
 AS
- BEGIN
-     IF(EXISTS(SELECT mh_ma, hs_ma FROM dbo.ki_2 WHERE mh_ma=@mh_ma AND hs_ma=@hs_ma)) PRINT N'sinh viên với bộ môn này đã có điểm'
-	 ELSE IF(NOT EXISTS(SELECT mh_ma FROM dbo.mh WHERE mh_ma=@mh_ma)) PRINT N'Môn học này chưa tồn tại'
-	 ELSE IF(NOT EXISTS(SELECT hs_ma FROM dbo.hs WHERE hs_ma=@hs_ma)) PRINT N'Học sinh này chưa tồn tại'
-	 ELSE INSERT INTO dbo.ki_2
-	 (
-	     hs_ma,
-	     mh_ma,
-	     ki_2_diem1,
-	     ki_2_diem2,
-	     ki_2_diem3,
-	     ki_2_diemtk,
-	     ki_2_hk,
-	     ki_2_hl
-	 )
-	 VALUES
-	 (   @hs_ma,  -- hs_ma - char(10)
-	     @mh_ma,  -- mh_ma - char(10)
-	     @ki_2_diem1, -- ki_2_diem1 - float
-	     @ki_2_diem2, -- ki_2_diem2 - float
-	     @ki_2_diem3, -- ki_2_diem3 - float
-	     @ki_2_diemtk, -- ki_2_diemtk - float
-	     @ki_2_hk, -- ki_2_hk - nchar(20)
-	     @ki_2_hl  -- ki_2_hl - nchar(20)
-	     )
- END
- GO
- EXEC sp_nhapdiem2 'HS1', 'MH1', 6, 9, 5.6, NULL, N'Tốt',NULL
-  EXEC sp_nhapdiem2 'HS2', 'MH1', 9, 9, 8.0, NULL, N'Tốt',NULL
-   EXEC sp_nhapdiem2 'HS3', 'MH2', 7, 5, 3.5, NULL, N'Tốt',NULL
-    EXEC sp_nhapdiem2 'HS4', 'MH3', 8, 6, 7.5, NULL, N'Tốt',NULL
-	EXEC sp_nhapdiem2 'HS2', 'MH2', 9, 3, 5, NULL, N'Tốt',NULL
+BEGIN
+    IF(NOT EXISTS(SELECT khoi_ma FROM dbo.khoi WHERE khoi_ma=@makhoi)) PRINT N'Khối này chưa tồn tại'
+	ELSE IF(EXISTS(SELECT khoi_ma FROM lop WHERE khoi_ma=@makhoi)) PRINT N'Khối này còn ràng buộc tới bảng lớp'
+	ELSE DELETE FROM dbo.khoi WHERE @makhoi = khoi_ma
+END
+GO
+EXEC sp_xoakhoi 'K5'
 
-CREATE VIEW v_tonghop 
+
+--xóa lớp
+CREATE PROC sp_xoalop @malop CHAR(10)
 AS
- SELECT dbo.khoi.khoi_ten, dbo.khoi.khoi_ma, dbo.lop.lop_ten, dbo.hs.hs_ma, dbo.hs.hs_ten, dbo.hs.hs_gioitinh, dbo.hs.hs_ngaysinh, dbo.hs.hs_diachi, dbo.hs.hs_sdt, dbo.ki_1.ki_1_diem1, 
- dbo.ki_1.ki_1_diem2, dbo.ki_1.ki_1_diem3,dbo.ki_1.ki_1_diemtk, dbo.ki_1.ki_1_hl, dbo.ki_1.ki_1_hk, dbo.ki_2.ki_2_diem1, dbo.ki_2.ki_2_diem2, dbo.ki_2.ki_2_diem3, dbo.ki_2.ki_2_diemtk, dbo.ki_2.ki_2_hl, dbo.ki_2.ki_2_hk
- FROM dbo.ki_1, dbo.ki_2, dbo.khoi, dbo.lop, dbo.hs, dbo.mh, dbo.gv
- WHERE khoi.khoi_ma=dbo.lop.khoi_ma AND dbo.lop.lop_ma=dbo.hs.lop_ma AND hs.hs_ma=dbo.ki_1.hs_ma AND dbo.hs.hs_ma=dbo.ki_2.hs_ma AND  mh.mh_ma=dbo.ki_1.mh_ma AND dbo.mh.mh_ma=dbo.ki_2.mh_ma AND 
- dbo.mh.gv_ma=dbo.gv.gv_ma
+BEGIN
+    IF(NOT EXISTS(SELECT lop_ma FROM dbo.lop WHERE lop_ma=@malop)) PRINT N'lớp này chưa tồn tại'
+	ELSE IF(EXISTS(SELECT lop_ma FROM dbo.hs WHERE lop_ma=@malop)) PRINT N'lớp này còn ràng buộc tới bảng học sinh'
+	ELSE DELETE FROM dbo.lop WHERE @malop = lop_ma
+END
+GO
+EXEC sp_xoalop 'L10'
 
- GO
+--xóa sinh viên
+CREATE PROC sp_xoahs @mahs CHAR(10)
+AS
+BEGIN
+    IF(NOT EXISTS(SELECT hs_ma FROM dbo.hs WHERE hs_ma=@mahs)) PRINT N'học sinh này không tồn tại'
+	ELSE IF(EXISTS(SELECT hs_ma FROM dbo.diemmh WHERE hs_ma=@mahs)) PRINT N'học sinh này còn ràng buộc với bảng điểm môn học'
+	ELSE IF(EXISTS(SELECT hs_ma FROM dbo.ca_nam WHERE hs_ma=@mahs)) PRINT N'học sinh này còn ràng buộc với bảng kì cả năm'
+	ELSE DELETE FROM dbo.ca_nam WHERE @mahs=hs_ma
+END
+GO
+EXEC sp_xoahs 'HS5'
 
- DROP VIEW v_tonghop
- SELECT * FROM  v_tonghop
---tạo view xem điểm trung bình 
+
+
+--xóa giảng viên
+CREATE PROC sp_xoagv @magv CHAR(10)
+AS
+BEGIN
+    IF(NOT EXISTS(SELECT gv_ma FROM dbo.gv WHERE @magv=gv_ma)) PRINT N'giảng viên này không tồn tại'
+	ELSE IF(EXISTS(SELECT gv_ma FROM dbo.mh WHERE gv_ma=@magv)) PRINT N'giảng viên còn đg ràng buộc tới môn học'
+	ELSE DELETE FROM dbo.mh WHERE @magv=gv_ma
+END
+GO
+EXEC sp_xoagv 'GV1'
+
+
+--xóa môn học
+CREATE PROC sp_xoamh @mamh CHAR(10)
+AS
+BEGIN
+     IF(NOT EXISTS(SELECT mh_ma FROM dbo.mh WHERE mh_ma=@mamh)) PRINT N'môn học này chưa tồn tại'
+	 ELSE IF(EXISTS(SELECT mh_ma FROM dbo.diemmh WHERE mh_ma=@mamh)) PRINT N'môn hoc này còn ràng buộc tới bảng điểm môn học'
+	 ELSE IF(EXISTS(SELECT mh_ma FROM dbo.ca_nam WHERE mh_ma=@mamh)) PRINT N'môn hoc này còn ràng buộc tới bảng kì cả năm'
+	 ELSE DELETE FROM dbo.mh WHERE mh_ma=@mamh
+END
+GO
+EXEC sp_xoamh 'MH1'
+
+
+--**********************************************************THỦ THỤC TRUY XUẤT DỮ LIỆU********************************************************
+
+
+--I. tất cả thông tin tổng hợp của học sinh 
+
+SELECT * FROM dbo.v_tonghop
+
+
+--II. xuất ra bảng điểm cá nhân theo mã học sinh
+--tìm bảng điểm sinh viên HS2
+EXEC sp_hstheoma 'HS2'
 
 
 
 
- 
+--III.In bảng điểm theo lớp
+
+EXEC sp_svtheolop 'L1'
+
+
+--IV. đếm số học sinh trong lớp theo mã
+EXEC sP_demsv
+
+
+
+
+
+--V. in ra sinh viên có điểm tổng kết >=8.0
+SELECT khoi.khoi_ten, lop.lop_ma, hs.hs_ma, hs.hs_ten, dbo.ca_nam.ca_nam_dtb, dbo.ca_nam.ca_nam_hocluc, dbo.ca_nam.ca_nam_hk FROM dbo.khoi, dbo.lop, dbo.hs, dbo.ca_nam
+WHERE lop.khoi_ma=dbo.khoi.khoi_ma AND dbo.lop.lop_ma=dbo.hs.lop_ma AND hs.hs_ma=dbo.ca_nam.hs_ma AND dbo.ca_nam.ca_nam_dtb>=8.0
+
+
+--VI. có bao nhiêu học sinh có hạnh kiểm khá
+
+
+PRINT( N'số học sinh có hạnh kiểm khá là: '+ CONVERT(NVARCHAR, dbo.f_demhkkha()))
+
+--VII. danh sách khối trong trường
+SELECT * FROM dbo.khoi
+
+--VIII. Danh sách lớp trong trường
+SELECT * FROM dbo.lop
+
+--IX. danh sách học sinh trong trường
+SELECT * FROM dbo.hs
+
+--X. bảng điểm 
+SELECT * FROM dbo.diemmh
+
+--XI. bảng điểm tổng kết 
+SELECT * FROM dbo.ca_nam
+
+
+--XII. môn học và giáo viên phụ trách
+SELECT dbo.gv.gv_ma, dbo.gv.gv_ten, gv.gv_gioitinh, gv.gv_diachi, gv.gv_sdt, dbo.mh.mh_ma, dbo.mh.mh_ten
+FROM mh, dbo.gv
+WHERE mh.gv_ma=gv.gv_ma
+
+
+
+
+
+
+
 SELECT * FROM dbo.khoi
 SELECT * FROM dbo.lop
 SELECT * FROM dbo.hs
-SELECT * FROM dbo.ki_1
-SELECT * FROM dbo.ki_2
+SELECT * FROM dbo.diemmh
 SELECT * FROM dbo.mh
 SELECT * FROM dbo.ca_nam
 SELECT * FROM dbo.gv
