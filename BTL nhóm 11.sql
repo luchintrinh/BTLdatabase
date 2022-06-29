@@ -224,8 +224,7 @@ EXEC dbo.sp_thaydoi @mahs = 'HS1',   -- char(10)
                     @diem3 = 9.6  -- float
 
 
-SELECT * FROM dbo.ca_nam
-SELECT * FROM dbo.diemmh
+go
 
 
 
@@ -244,7 +243,6 @@ GO
 
 
 ----****************************NHẬP NHẬP DỮ LIỆU******************
-
 
 --nhập khối 10, 11, 12 với mã lần lượt là: K1, K2, K3
 INSERT INTO dbo.khoi
@@ -339,6 +337,7 @@ EXEC sp_nhaphs 'HS1', 'L1', N'Lù Chín Trình', N'nam', '2002-02-26', N'Lào Ca
 EXEC sp_nhaphs 'HS2', 'L1', N'Vũ Thị Tuyết', N'nữ', '2002-08-09', N'Ninh Bình', '025615122'
 EXEC sp_nhaphs 'HS3', 'L2', N'Nguyễn Thành Đạt', N'nam', '2002-09-07', N'Hải Dương', '0218755'
 EXEC sp_nhaphs 'HS4', 'L3', N'Lê Phương Thảo', N'nữ', '2002-01-17', N'Hà Nội', '026516455'
+EXEC sp_nhaphs 'HS5', 'L2', N'Vi Hoàng Hải', N'nam', '2002-12-22', N'Lạng Sơn', '0267822162'
 GO
 
 
@@ -454,17 +453,21 @@ AS
  GO
 
  EXEC sp_nhapdiemmh 'HS1', 'MH1', 6, 9, 5.6, NULL, N'tốt'
+ EXEC sp_nhapdiemmh 'HS1', 'MH2', 7, 9, 8.5, NULL, N'tốt'
+  EXEC sp_nhapdiemmh 'HS1', 'MH3', 6, 9, 8, NULL, N'tốt'
   EXEC sp_nhapdiemmh 'HS2', 'MH1', 7, 7, 7.6, NULL, N'khá'
+  EXEC sp_nhapdiemmh 'HS2', 'MH3', 6, 7, 8, NULL, N'tốt'
+  EXEC sp_nhapdiemmh 'HS2', 'MH2', 8, 7, 9, NULL, N'tốt'
    EXEC sp_nhapdiemmh 'HS3', 'MH2', 6, 9, 5.6, NULL, N'tốt'
+   EXEC sp_nhapdiemmh 'HS3', 'MH1', 8, 9, 9.8, NULL, N'tốt'
+   EXEC sp_nhapdiemmh 'HS3', 'MH3', 7, 5.5, 7.6, NULL, N'khá'
     EXEC sp_nhapdiemmh 'HS4', 'MH3', 8, 9, 4.6, NULL, N'tốt'
-	EXEC sp_nhapdiemmh 'HS2', 'MH2', 5, 3, 8.6, NULL, N'khá'
+	EXEC sp_nhapdiemmh 'HS4', 'MH2', 5, 3, 8.6, NULL, N'khá'
+	EXEC sp_nhapdiemmh 'HS4', 'MH1', 7, 8, 7.6, NULL, N'tốt'
+	EXEC sp_nhapdiemmh 'HS5', 'MH3', 8, 9, 7.6, NULL, N'tốt'
+	EXEC sp_nhapdiemmh 'HS5', 'MH1', 7, 8, 8, NULL, N'tốt'
+	EXEC sp_nhapdiemmh 'HS5', 'MH2', 6, 8, 9, NULL, N'tốt'
 GO
-
-
-
-
-
-
 
 
 --**************THỦ TUC XÓA DỮ LIỆU*****************
@@ -477,7 +480,7 @@ BEGIN
 	ELSE DELETE FROM dbo.khoi WHERE @makhoi = khoi_ma
 END
 GO
-EXEC sp_xoakhoi 'K5'
+EXEC sp_xoakhoi 'K3'
 
 
 --xóa lớp
@@ -489,7 +492,7 @@ BEGIN
 	ELSE DELETE FROM dbo.lop WHERE @malop = lop_ma
 END
 GO
-EXEC sp_xoalop 'L10'
+EXEC sp_xoalop 'L3'
 
 --xóa sinh viên
 CREATE PROC sp_xoahs @mahs CHAR(10)
@@ -523,14 +526,13 @@ AS
 BEGIN
      IF(NOT EXISTS(SELECT mh_ma FROM dbo.mh WHERE mh_ma=@mamh)) PRINT N'môn học này chưa tồn tại'
 	 ELSE IF(EXISTS(SELECT mh_ma FROM dbo.diemmh WHERE mh_ma=@mamh)) PRINT N'môn hoc này còn ràng buộc tới bảng điểm môn học'
-	 ELSE IF(EXISTS(SELECT mh_ma FROM dbo.ca_nam WHERE mh_ma=@mamh)) PRINT N'môn hoc này còn ràng buộc tới bảng kì cả năm'
 	 ELSE DELETE FROM dbo.mh WHERE mh_ma=@mamh
 END
 GO
 EXEC sp_xoamh 'MH1'
 
 
---**********************************************************THỦ THỤC TRUY XUẤT DỮ LIỆU********************************************************
+--**********************************************************TRUY XUẤT DỮ LIỆU********************************************************
 
 
 --I. tất cả thông tin tổng hợp của học sinh 
